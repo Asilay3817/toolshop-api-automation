@@ -1,6 +1,7 @@
 import requests
 
 from config import BASE_URL, TIMEOUT
+from utils.helper import Helper
 
 class BaseApi:
     def __init__(self) -> None:
@@ -11,11 +12,13 @@ class BaseApi:
             "Content-Type": "application/json",
             "Accept": "application/json"
         })
+        self.helper = Helper()
 
     def _request(self, method, endpoint, **kwargs):
         url = f"{self.base_url}/{endpoint.lstrip('/')}"
         kwargs.setdefault("timeout", self.timeout)
         response = self.session.request(method, url, **kwargs)
+        self.helper.attach_response(response)
         return response
 
     def get(self, endpoin, **kwargs):

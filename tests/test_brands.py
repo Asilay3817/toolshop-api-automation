@@ -13,7 +13,7 @@ class TestBrands:
         in test we are chek tat response len !=0 and status 200
         """
         response = brands_client.get_all()
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
 
         brands = [BrandsModel(**item) for item in response.json()]
         assert len(brands) > 0
@@ -25,7 +25,7 @@ class TestBrands:
         """
         payload = brand_payload()
         response = brands_client.create(payload)
-        assert response.status_code == 201
+        assert response.status_code == 201, response.text
         model = BrandsModel(**response.json())
         assert model.name == payload['name']
         assert model.slug == payload['slug']
@@ -33,7 +33,7 @@ class TestBrands:
         brand_id = model.id
 
         get_by_id_response = brands_client.get_by_id(brand_id)
-        assert get_by_id_response.status_code == 200
+        assert get_by_id_response.status_code == 200, get_by_id_response.text
         assert model.name == payload['name']
         assert model.slug == payload['slug']
 
