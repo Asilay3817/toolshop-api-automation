@@ -10,3 +10,10 @@ class Helper:
             name=name,
             attachment_type=AttachmentType.TEXT
         )
+
+
+class Assertions:
+    @staticmethod
+    def assert_brands_matches(model, payload: dict):
+        assert model.name == payload['name']
+        assert model.slug == payload['slug']
