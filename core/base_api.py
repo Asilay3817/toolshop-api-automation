@@ -1,9 +1,10 @@
-from venv import logger
-
+import logging
 import requests
 
 from config import BASE_URL, TIMEOUT
 from utils.helper import Helper
+
+logger = logging.getLogger(__name__)
 
 class BaseApi:
     def __init__(self) -> None:

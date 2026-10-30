@@ -5,6 +5,10 @@ from pathlib import Path
 from core.endpoints.brands import BrandsClient
 from allure_commons.types import AttachmentType
 
+from config import setup_logging
+
+setup_logging()
+
 @pytest.fixture
 def brands_client():
     return BrandsClient()

@@ -1,6 +1,8 @@
 import allure
+import pytest
 
 from core.models.brands_model import BrandsModel
+from utils.helper import Assertions
 from core.payloads.brands import brand_payload
 
 
@@ -19,6 +21,7 @@ class TestBrands:
         assert len(brands) > 0
 
     @allure.story("Create brand")
+    @pytest.mark.regress
     def test_create_brand(self, brands_client):
         """
         in test we are chek tat brand is created and answer structure equal model
@@ -27,15 +30,13 @@ class TestBrands:
         response = brands_client.create(payload)
         assert response.status_code == 201, response.text
         model = BrandsModel(**response.json())
-        assert model.name == payload['name']
-        assert model.slug == payload['slug']
+        Assertions.assert_brands_matches(model, payload)
 
         brand_id = model.id
 
         get_by_id_response = brands_client.get_by_id(brand_id)
         assert get_by_id_response.status_code == 200, get_by_id_response.text
-        assert model.name == payload['name']
-        assert model.slug == payload['slug']
+        Assertions.assert_brands_matches(model, payload)
 
 
 
