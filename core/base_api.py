@@ -7,7 +7,7 @@ from utils.helper import Helper
 
 class BaseApi:
     def __init__(self) -> None:
-        self.base_url = BASE_URL
+        self.base_url = BASE_URL.rstrip("/")
         self.timeout = TIMEOUT
         self.session = requests.session()
         self.session.headers.update({
