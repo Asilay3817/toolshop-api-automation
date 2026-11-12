@@ -7,8 +7,10 @@ from core.endpoints.users import UsersClient
 from allure_commons.types import AttachmentType
 
 from config import setup_logging, LOG_FILE, ADMIN_EMAIL, ADMIN_PASSWORD
+from core.payloads.brands import brand_payload
 
 setup_logging()
+
 
 @pytest.fixture
 def brands_client():
@@ -38,6 +40,9 @@ def auth_client():
 
 @pytest.fixture(scope="function")
 def admin_token(auth_client):
+    """
+    Auth with admin data
+    """
     admin_payload = {
         "email": ADMIN_EMAIL,
         "password": ADMIN_PASSWORD
@@ -57,3 +62,22 @@ def admin_brands_client(admin_token):
     client = BrandsClient()
     client.session.headers.update({"Authorization": f"Bearer {admin_token}"})
     return client
+
+
+@pytest.fixture
+def created_brand(admin_brands_client):
+    """
+    Create brand for tests
+    """
+    payload = brand_payload()
+    response = admin_brands_client.create(payload)
+
+    assert response.status_code == 201, response.text
+
+    brand_data = response.json()
+    yield brand_data
+
+    try:
+        admin_brands_client.delete_by_id(brand_data["id"])
+    except Exception:
+        pass
