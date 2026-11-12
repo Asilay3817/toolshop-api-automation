@@ -8,5 +8,5 @@ class UsersClient(BaseApi):
         return self.get("/users")
 
     @allure.step("User loging")
-    def loging_user(self, payload: dict):
+    def login_user(self, payload: dict):
         return self.post("/users/login", json=payload)

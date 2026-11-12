@@ -6,7 +6,7 @@ from core.endpoints.brands import BrandsClient
 from core.endpoints.users import UsersClient
 from allure_commons.types import AttachmentType
 
-from config import setup_logging, ADMIN_EMAIL, ADMIN_PASSWORD
+from config import setup_logging, LOG_FILE, ADMIN_EMAIL, ADMIN_PASSWORD
 
 setup_logging()
 
@@ -17,7 +17,7 @@ def brands_client():
 
 @pytest.fixture(autouse=True)
 def attach_log_to_allure():
-    log_file = Path("logs/test.log")
+    log_file = Path(LOG_FILE)
     log_file.write_text("")
 
     yield
@@ -43,7 +43,17 @@ def admin_token(auth_client):
         "password": ADMIN_PASSWORD
     }
 
-    response = auth_client.loging_user(admin_payload)
+    response = auth_client.login_user(admin_payload)
 
     assert response.status_code == 200, response.text
     return response.json()["access_token"]
+
+
+@pytest.fixture
+def admin_brands_client(admin_token):
+    """
+    Return brands_client with admin root
+    """
+    client = BrandsClient()
+    client.session.headers.update({"Authorization": f"Bearer {admin_token}"})
+    return client
