@@ -12,7 +12,7 @@ class TestBrands:
     @allure.story("Get all brands")
     def test_get_all_brands(self, brands_client):
         """
-        in test we are chek tat response len !=0 and status 200
+        in test we are chek that response len !=0 and status 200
         """
         response = brands_client.get_all()
         assert response.status_code == 200, response.text
@@ -24,7 +24,7 @@ class TestBrands:
     @pytest.mark.regress
     def test_create_brand(self, brands_client):
         """
-        in test we are chek tat brand is created and answer structure equal model
+        in test we are chek that brand is created and answer structure equal model
         """
         payload = brand_payload()
         response = brands_client.create(payload)
@@ -38,6 +38,9 @@ class TestBrands:
         assert get_by_id_response.status_code == 200, get_by_id_response.text
         Assertions.assert_brands_matches(model, payload)
 
+        delete_by_id_response = brands_client.delete_by_id(brand_id)
+        assert delete_by_id_response.status_code == 200, delete_by_id_response.text
+        
 
 
 

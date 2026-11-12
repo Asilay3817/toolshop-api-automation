@@ -3,9 +3,10 @@ import allure
 
 from pathlib import Path
 from core.endpoints.brands import BrandsClient
+from core.endpoints.users import UsersClient
 from allure_commons.types import AttachmentType
 
-from config import setup_logging
+from config import setup_logging, ADMIN_EMAIL, ADMIN_PASSWORD
 
 setup_logging()
 
@@ -28,3 +29,21 @@ def attach_log_to_allure():
             name="test.log",
             attachment_type=AttachmentType.TEXT,
         )
+
+
+@pytest.fixture(scope="session")
+def auth_client():
+    return UsersClient()
+
+
+@pytest.fixture(scope="function")
+def admin_token(auth_client):
+    admin_payload = {
+        "email": ADMIN_EMAIL,
+        "password": ADMIN_PASSWORD
+    }
+
+    response = auth_client.loging_user(admin_payload)
+
+    assert response.status_code == 200, response.text
+    return response.json()["access_token"]

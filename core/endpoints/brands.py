@@ -14,3 +14,7 @@ class BrandsClient(BaseApi):
     @allure.step("Get brand by id")
     def get_by_id(self, id):
         return self.get(f"/brands/{id}")
+
+    @allure.step('Delete brand by id')
+    def delete_by_id(self, id):
+        return self.delete(f"/brands/{id}")

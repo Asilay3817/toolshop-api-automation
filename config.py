@@ -11,6 +11,9 @@ TIMEOUT: float = float(os.getenv("TIMEOUT", "15"))
 LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")
 LOG_FILE: str = os.getenv("LOG_FILE", "logs/test.log")
 
+ADMIN_EMAIL: str = os.getenv("ADMIN_EMAIL", "")
+ADMIN_PASSWORD: str = os.getenv("ADMIN_PASSWORD", "")
+
 if not BASE_URL:
     raise ValueError("URL не задан в .env")
 
