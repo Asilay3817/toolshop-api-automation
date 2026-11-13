@@ -15,5 +15,6 @@ class Helper:
 class Assertions:
     @staticmethod
     def assert_brands_matches(model, payload: dict):
-        assert model.name == payload['name']
-        assert model.slug == payload['slug']
+        with allure.step('Assert brands matches payload'):
+            assert model.name == payload['name']
+            assert model.slug == payload['slug']
