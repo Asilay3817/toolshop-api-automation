@@ -42,7 +42,6 @@ def pytest_runtest_setup(item):
         if marker.name not in ("parametrize", "usefixtures", "skip", "skipif", "xfail", "allure_label"):
             allure.dynamic.tag(marker.name)
 
-
 @pytest.fixture(scope="session")
 def auth_client():
     return UsersClient()
