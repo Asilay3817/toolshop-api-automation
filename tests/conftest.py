@@ -33,6 +33,16 @@ def attach_log_to_allure():
         )
 
 
+@pytest.hookimpl(tryfirst=True)
+def pytest_runtest_setup(item):
+    """
+    Add pytest mark tags in Allure
+    """
+    for marker in item.iter_markers():
+        if marker.name not in ("parametrize", "usefixtures", "skip", "skipif", "xfail", "allure_label"):
+            allure.dynamic.tag(marker.name)
+
+
 @pytest.fixture(scope="session")
 def auth_client():
     return UsersClient()
