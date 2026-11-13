@@ -1,6 +1,8 @@
 import allure
 import pytest
 
+from pydantic import TypeAdapter
+
 from core.models.brands_model import BrandsModel
 from utils.helper import Assertions
 from core.payloads.brands import brand_payload
@@ -63,3 +65,29 @@ class TestBrands:
 
         response = brands_client.create(payload)
         assert response.status_code == 422, response.text
+
+    @allure.story("Delete brand")
+    @pytest.mark.regress
+    @pytest.mark.smoke
+    def test_delete_brand(self, admin_brands_client, created_brand):
+        """
+        in test we are chek that brand can be deleted
+        after check that brand exactly deleted
+        """
+        brand_id = created_brand["id"]
+        delete_by_id_response = admin_brands_client.delete_by_id(brand_id)
+        with allure.step("Verify that the delete brands by id endpoint returns 204"):
+            assert delete_by_id_response.status_code == 204, delete_by_id_response.text
+
+        get_by_id_response = admin_brands_client.get_by_id(brand_id)
+        with allure.step("Verify that the brands by id endpoint returns 404 after deleted"):
+            assert get_by_id_response.status_code == 404, get_by_id_response.text
+
+        get_all_brands_response = admin_brands_client.get_all()
+        with allure.step("Verify that the brands list endpoint returns 200 OK"):
+            assert get_all_brands_response.status_code == 200, get_all_brands_response.text
+        brands_list = TypeAdapter(list[BrandsModel]).validate_python(get_all_brands_response.json())
+
+        found_brand = next((b for b in brands_list if b.id == brand_id), None)
+        with allure.step(f"Verify that id:{brand_id} is not in the brands list"):
+            assert found_brand is None, f"brand with id:{brand_id} was found"
