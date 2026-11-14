@@ -18,10 +18,12 @@ class TestBrands:
         in test we are chek that response len !=0 and status 200
         """
         response = brands_client.get_all()
-        assert response.status_code == 200, response.text
+        with allure.step("Verify that the brands list endpoint returns 200 OK"):
+            assert response.status_code == 200, response.text
 
         brands = [BrandsModel(**item) for item in response.json()]
-        assert len(brands) > 0
+        with allure.step("Verify that the brands list is not empty"):
+            assert len(brands) > 0
 
     @allure.story("Create brand")
     @pytest.mark.regress
@@ -33,21 +35,25 @@ class TestBrands:
         """
         payload = brand_payload()
         response = admin_brands_client.create(payload)
-        assert response.status_code == 201, response.text
+        with allure.step("Verify that the create brand endpoint returns 201 OK"):
+            assert response.status_code == 201, response.text
         model = BrandsModel(**response.json())
         Assertions.assert_brands_matches(model, payload)
 
         brand_id = model.id
 
         get_by_id_response = admin_brands_client.get_by_id(brand_id)
-        assert get_by_id_response.status_code == 200, get_by_id_response.text
+        with allure.step("Verify that the return brand by id endpoint returns 200 OK"):
+            assert get_by_id_response.status_code == 200, get_by_id_response.text
         Assertions.assert_brands_matches(model, payload)
 
         delete_by_id_response = admin_brands_client.delete_by_id(brand_id)
-        assert delete_by_id_response.status_code == 204, delete_by_id_response.text
+        with allure.step("Verify that the delete brand by id endpoint returns 204 OK"):
+            assert delete_by_id_response.status_code == 204, delete_by_id_response.text
 
         get_by_id_response = admin_brands_client.get_by_id(brand_id)
-        assert get_by_id_response.status_code == 404, get_by_id_response.text
+        with allure.step("Verify that the return brand by id (after delete) endpoint returns 404"):
+            assert get_by_id_response.status_code == 404, get_by_id_response.text
 
 
     @allure.story("Create brand without required item")
@@ -64,7 +70,8 @@ class TestBrands:
         del payload[field]
 
         response = brands_client.create(payload)
-        assert response.status_code == 422, response.text
+        with allure.step("Verify that the create brand endpoint returns 422 without required item"):
+            assert response.status_code == 422, response.text
 
     @allure.story("Delete brand")
     @pytest.mark.regress
@@ -91,3 +98,29 @@ class TestBrands:
         found_brand = next((b for b in brands_list if b.id == brand_id), None)
         with allure.step(f"Verify that id:{brand_id} is not in the brands list"):
             assert found_brand is None, f"brand with id:{brand_id} was found"
+
+
+    @allure.story("Update Brand")
+    @pytest.mark.regress
+    @pytest.mark.smoke
+    def test_update_brand(self, brands_client, created_brand):
+        """
+        Verify that the brand is updated successfully and its data
+        matches the update payload when fetched by ID
+        """
+        brand_id = created_brand["id"]
+        payload = brand_payload()
+        update_by_id_response = brands_client.update_by_id(brand_id, payload)
+
+        with allure.step("Verify that the update brands by id endpoint returns 200 OK"):
+            assert update_by_id_response.status_code == 200, update_by_id_response.text
+
+        get_by_id_response = brands_client.get_by_id(brand_id)
+        with allure.step("Verify that the return brand by id endpoint returns 200 OK"):
+            assert get_by_id_response.status_code == 200, get_by_id_response.text
+        model = BrandsModel(**get_by_id_response.json())
+        Assertions.assert_brands_matches(model, payload)
+
+        get_all_brands_response = brands_client.get_all()
+        with allure.step("Verify that the brands list endpoint returns 200 OK"):
+            assert get_all_brands_response.status_code == 200, get_all_brands_response.text
