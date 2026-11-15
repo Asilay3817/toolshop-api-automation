@@ -1,8 +1,6 @@
 import allure
 import pytest
 
-from pydantic import TypeAdapter
-
 from core.models.brands_model import BrandsModel
 from utils.helper import Assertions
 from core.payloads.brands import brand_payload
