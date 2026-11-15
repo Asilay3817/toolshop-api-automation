@@ -15,13 +15,13 @@ class TestBrands:
     @pytest.mark.regress
     def test_get_all_brands(self, brands_client):
         """
-        in test we are chek that response len !=0 and status 200
+        Verify that the brands list endpoint returns 200 OK and a non-empty list
         """
         response = brands_client.get_all()
         with allure.step("Verify that the brands list endpoint returns 200 OK"):
             assert response.status_code == 200, response.text
 
-        brands = [BrandsModel(**item) for item in response.json()]
+        brands = BrandsModel.parse_list(response)
         with allure.step("Verify that the brands list is not empty"):
             assert len(brands) > 0
 
@@ -93,7 +93,7 @@ class TestBrands:
         get_all_brands_response = admin_brands_client.get_all()
         with allure.step("Verify that the brands list endpoint returns 200 OK"):
             assert get_all_brands_response.status_code == 200, get_all_brands_response.text
-        brands_list = TypeAdapter(list[BrandsModel]).validate_python(get_all_brands_response.json())
+        brands_list = BrandsModel.parse_list(get_all_brands_response)
 
         found_brand = next((b for b in brands_list if b.id == brand_id), None)
         with allure.step(f"Verify that id:{brand_id} is not in the brands list"):
@@ -119,8 +119,15 @@ class TestBrands:
         with allure.step("Verify that the return brand by id endpoint returns 200 OK"):
             assert get_by_id_response.status_code == 200, get_by_id_response.text
         model = BrandsModel(**get_by_id_response.json())
-        Assertions.assert_brands_matches(model, payload)
+        with allure.step("Verify that the updated brand data matches the payload"):
+            Assertions.assert_brands_matches(model, payload)
 
         get_all_brands_response = brands_client.get_all()
         with allure.step("Verify that the brands list endpoint returns 200 OK"):
             assert get_all_brands_response.status_code == 200, get_all_brands_response.text
+        brands_list_model = BrandsModel.parse_list(get_all_brands_response)
+        found_brand = next((b for b in brands_list_model if b.id == brand_id), None)
+
+        assert found_brand is not None, f"brand with id:{brand_id} was not found in the list"
+        with allure.step("Verify that the updated brand data matches the payload"):
+            Assertions.assert_brands_matches(found_brand, payload)
