@@ -131,3 +131,36 @@ class TestBrands:
         assert found_brand is not None, f"brand with id:{brand_id} was not found in the list"
         with allure.step("Verify that the updated brand data matches the payload"):
             Assertions.assert_brands_matches(found_brand, payload)
+
+
+    @allure.story("Update Brand without required item")
+    @pytest.mark.regress
+    @pytest.mark.smoke
+    @pytest.mark.parametrize("field", [
+        "name",
+        "slug"
+    ])
+    def test_partial_update_brand(self, brands_client, created_brand, field):
+        """
+        Verify that the brand can be successfully updated when some optional fields are omitted
+        """
+        brand_id = created_brand["id"]
+        payload = brand_payload()
+        del payload[field]
+        update_by_id_response = brands_client.update_by_id(brand_id, payload)
+
+        with allure.step(f"Verify that the update brand endpoint returns 200 without '{field}'"):
+            assert update_by_id_response.status_code == 200, update_by_id_response.text
+
+        with allure.step(f"Verify the state of the omitted field '{field}' after update"):
+            get_response = brands_client.get_by_id(brand_id)
+            assert get_response.status_code == 200, get_response.text
+            updated_brand = BrandsModel(**get_response.json())
+
+            with allure.step(f"Verify that the provided fields were updated successfully"):
+                for key, value in payload.items():
+                    assert getattr(updated_brand, key) == value, f"field '{key}' was not updated correctly"
+
+            with allure.step(f"Verify that the omitted field '{field}' remains unchanged"):
+                assert getattr(updated_brand, field) == created_brand[field], \
+                    f"omitted field '{field}' changed, but it should remain '{created_brand[field]}'"
